@@ -1,7 +1,7 @@
 #pylint: disable=line-too-long, protected-access
 import json
-import Queue
-from urlparse import urljoin
+import queue
+from urllib.parse import urljoin
 
 import pytest
 from octoprint.events import Events
@@ -299,7 +299,7 @@ def test_readline(comm, httpretty, set_time, command_queue, response, current_ti
     assert response == expected_return
     try:
         assert comm._command_uri_queue.get_nowait() == expected_queue
-    except Queue.Empty:
+    except queue.Empty:
         assert not expected_queue
 
 @pytest.mark.parametrize("line, expected", [
@@ -530,7 +530,7 @@ def test_close_while_printing(comm, event_manager):
 
 @pytest.mark.parametrize("command, sent_command", [
     ('G1 X50 Y50', 'G1 X50 Y50'),
-    (u'G28; HOME!!!!', 'G28'),
+    ('G28; HOME!!!!', 'G28'),
 ])
 @pytest.mark.usefixtures('connect_printer')
 def test_send_command_printer_operational(command, sent_command, comm, httpretty, set_time):
@@ -558,7 +558,7 @@ def test_send_command_printer_not_operational(comm, httpretty):
     comm._state = _comm.PRINTER_STATE['OFFLINE']
 
     comm.sendCommand('G1 X50 Y50')
-    with pytest.raises(Queue.Empty):
+    with pytest.raises(queue.Empty):
         comm._command_uri_queue.get_nowait()
     assert not httpretty.has_request()
 
@@ -574,7 +574,7 @@ def test_send_command_bad_response(comm, httpretty):
                            adding_headers={'Location': command_uri})
 
     comm.sendCommand('G1 X50 Y50')
-    with pytest.raises(Queue.Empty):
+    with pytest.raises(queue.Empty):
         comm._command_uri_queue.get_nowait()
     assert httpretty.last_request().body == json.dumps({'command': 'G1 X50 Y50'})
 

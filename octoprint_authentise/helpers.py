@@ -1,10 +1,10 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 
 import json
 import os
 import subprocess
-from urlparse import urljoin
+from urllib.parse import urljoin
 from uuid import uuid4
 
 import requests

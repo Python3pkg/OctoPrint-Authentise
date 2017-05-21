@@ -1,14 +1,14 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 
 import logging
 import os
-import Queue
+import queue
 import re
 import threading
 import time
-import urlparse
-from urllib import quote_plus
+import urllib.parse
+from urllib.parse import quote_plus
 
 import octoprint.plugin
 import requests
@@ -32,7 +32,7 @@ PRINTER_STATE = {
     'ERROR'             : octoprint.plugin.MachineComPlugin.STATE_ERROR,
     'CLOSED_WITH_ERROR' : octoprint.plugin.MachineComPlugin.STATE_CLOSED_WITH_ERROR,
     }
-PRINTER_STATE_REVERSE = dict((v,k) for k,v in PRINTER_STATE.items())
+PRINTER_STATE_REVERSE = dict((v,k) for k,v in list(PRINTER_STATE.items()))
 
 FLOAT_RE = r'[-+]?\d*\.?\d+'
 JUNK_RE = r'(?:\s+.*?\s*)?'
@@ -166,9 +166,9 @@ class MachineCom(octoprint.plugin.MachineComPlugin): #pylint: disable=too-many-i
         self._change_state(PRINTER_STATE['CONNECTING'])
 
     def _get_or_create_printer(self, port, baud_rate):
-        client_url = urlparse.urljoin(self._authentise_url, '/client/{}/'.format(self.node_uuid)) #pylint: disable=no-member
+        client_url = urllib.parse.urljoin(self._authentise_url, '/client/{}/'.format(self.node_uuid)) #pylint: disable=no-member
 
-        url = urlparse.urljoin(self._authentise_url,
+        url = urllib.parse.urljoin(self._authentise_url,
                                '/printer/instance/?filter[client]={}'.format(quote_plus(client_url)))
         target_printer = None
         self._log('Getting printer list from: {}'.format(url))
@@ -201,7 +201,7 @@ class MachineCom(octoprint.plugin.MachineComPlugin): #pylint: disable=too-many-i
                 'port'              : port,
                 'printer_model'     : 'https://print.dev-auth.com/printer/model/{}/'.format(model),
             }
-            create_printer_resp = self._session.post(urlparse.urljoin(self._authentise_url,
+            create_printer_resp = self._session.post(urllib.parse.urljoin(self._authentise_url,
                                                                  '/printer/instance/'),
                                                 json=payload)
             return create_printer_resp.headers["Location"]
@@ -261,7 +261,7 @@ class MachineCom(octoprint.plugin.MachineComPlugin): #pylint: disable=too-many-i
         if state is None:
             state = self._state
 
-        possible_states = filter(lambda x: x.startswith("STATE_"), self.__class__.__dict__.keys()) #pylint: disable=bad-builtin, deprecated-lambda
+        possible_states = [x for x in list(self.__class__.__dict__.keys()) if x.startswith("STATE_")] #pylint: disable=bad-builtin, deprecated-lambda
         for possible_state in possible_states:
             if getattr(self, possible_state) == state:
                 return possible_state[len("STATE_"):]
@@ -378,7 +378,7 @@ class MachineCom(octoprint.plugin.MachineComPlugin): #pylint: disable=too-many-i
 
         if self.isOperational():
             data = {'command': cmd}
-            printer_command_url = urlparse.urljoin(self._printer_uri, 'command/')
+            printer_command_url = urllib.parse.urljoin(self._printer_uri, 'command/')
 
             response = self._session.post(printer_command_url, json=data)
             if not response.ok:
@@ -480,7 +480,7 @@ class MachineCom(octoprint.plugin.MachineComPlugin): #pylint: disable=too-many-i
 
         try:
             command = self._command_uri_queue.get_nowait()
-        except Queue.Empty:
+        except queue.Empty:
             return ''
 
         start_time    = command['start_time']

@@ -129,7 +129,7 @@ def _git_to_version(git):
         version = git
     else:
         version = "{tag}.post0.dev{offset}".format(**match.groupdict())
-    print("Calculated {0} version '{1}' from git description '{2}'".format(plugin_package, version, git))
+    print(("Calculated {0} version '{1}' from git description '{2}'".format(plugin_package, version, git)))
     return version
 
 @contextlib.contextmanager
@@ -138,7 +138,7 @@ def write_version():
     git_branches = _get_git_branches_for_this_commit()
     version = _git_to_version(git_description) if git_description else None
     if git_branches and not _is_on_releasable_branch(git_branches):
-        print("Forcing version to 0.0.1 because this commit is on branches {0} and not a whitelisted branch".format(git_branches))
+        print(("Forcing version to 0.0.1 because this commit is on branches {0} and not a whitelisted branch".format(git_branches)))
         version = '0.0.1'
     if version:
         with open(VERSION_FILE, 'r') as version_file:

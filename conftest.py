@@ -2,7 +2,7 @@ import json
 import logging
 import random
 import uuid
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 import httpretty as HTTPretty
 import octoprint.plugin
@@ -157,5 +157,5 @@ def cut_insignificant_digits_recursively(obj, places):
     if t == dict:
         return {cut_insignificant_digits_recursively(key, places):
                 cut_insignificant_digits_recursively(val, places)
-                for key,val in obj.items()}
+                for key,val in list(obj.items())}
     return obj
